@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习：大模型上下文（Context）</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .arrow { transform: rotate(90deg); }
+  .arrow { transition: transform .18s ease; display: inline-block; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+<header class="bg-gradient-to-br from-teal-600 via-teal-600 to-emerald-600 text-white">
+  <div class="mx-auto max-w-4xl px-6 py-12">
+    <div class="flex items-center gap-3 text-teal-100 text-sm font-medium">
+      <span>项目首页</span><span>/</span><span>learning-materials</span>
+    </div>
+    <h1 class="mt-4 text-4xl sm:text-5xl font-bold tracking-tight">大模型上下文（Context）</h1>
+    <p class="mt-3 text-lg text-teal-100">概念学习资料 · 由项目级 Skill「概念学习资料生成器」生成</p>
+    <div class="mt-6 flex flex-wrap gap-2 text-xs">
+      <span class="rounded-full bg-white/15 px-3 py-1">AI 基础概念</span>
+      <span class="rounded-full bg-white/15 px-3 py-1">建议学习时长 15 分钟</span>
+      <span class="rounded-full bg-white/15 px-3 py-1">含 2 道自测题</span>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-10 border-b border-slate-200 bg-white/85 backdrop-blur">
+  <div class="mx-auto flex max-w-4xl flex-wrap gap-x-6 gap-y-2 px-6 py-3 text-sm text-slate-600">
+    <a href="#s1" class="hover:text-teal-600">一句话定义</a>
+    <a href="#s2" class="hover:text-teal-600">核心机制</a>
+    <a href="#s3" class="hover:text-teal-600">应用场景</a>
+    <a href="#s4" class="hover:text-teal-600">易混淆与边界</a>
+    <a href="#s5" class="hover:text-teal-600">自测</a>
+    <a href="#s6" class="hover:text-teal-600">参考资料</a>
+    <a href="../concept-relationship.md" class="ml-auto font-medium text-teal-600 hover:underline">查看三概念关系 →</a>
+  </div>
+</nav>
+
+<main class="mx-auto max-w-4xl px-6 py-10 space-y-10">
+
+  <!-- 1 -->
+  <section id="s1" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-teal-50/70 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-sm font-bold text-white">1</span>
+        <h2 class="text-xl font-semibold text-slate-900">标题与一句话定义</h2>
+      </div>
+      <div class="px-6 py-6">
+        <div class="rounded-xl border-l-4 border-teal-500 bg-teal-50/50 p-5">
+          <p class="text-lg leading-relaxed text-slate-800">
+            <strong>上下文（Context）</strong>就是：<span class="font-semibold text-teal-700">模型在某一次请求里能看到的全部信息（所有 token）；而「上下文工程」就是在整个推理过程中，持续维护一个「最小且高信号」的 token 集合。</span>
+          </p>
+        </div>
+        <p class="mt-5 leading-relaxed text-slate-700">
+          它不是「聊天记录」的别名。系统提示、工具定义、工具返回结果、历史消息、附件、技能、模型的思考块——只要进了这次请求，统统算上下文。你为输入 token 付费，也为输出 token 付费，而且<strong>窗口一旦塞满，请求直接失败</strong>。
+        </p>
+        <p class="mt-4 leading-relaxed text-slate-700">
+          所以目标从来不是「把所有东西都塞进去」，而是<strong>把对的东西塞进去</strong>。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="s2" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-teal-50/70 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-sm font-bold text-white">2</span>
+        <h2 class="text-xl font-semibold text-slate-900">核心机制与组成</h2>
+      </div>
+      <div class="space-y-6 px-6 py-6">
+
+        <div>
+          <h3 class="mb-3 font-semibold text-slate-900">2.1 上下文由什么构成</h3>
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="font-semibold text-teal-700">系统提示</div>
+              <p class="mt-1 text-sm text-slate-600">角色、规则、输出格式等常驻指令。</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="font-semibold text-teal-700">消息历史</div>
+              <p class="mt-1 text-sm text-slate-600">本轮之前的多轮对话内容。</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="font-semibold text-teal-700">工具定义</div>
+              <p class="mt-1 text-sm text-slate-600">可用工具的名称、参数与说明，本身就占 token。</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="font-semibold text-teal-700">工具结果</div>
+              <p class="mt-1 text-sm text-slate-600">长任务中最主要的膨胀来源，常被低估。</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="font-semibold text-teal-700">附件与技能</div>
+              <p class="mt-1 text-sm text-slate-600">上传的文件、被加载的 Skill 内容。</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="font-semibold text-teal-700">思考块</div>
+              <p class="mt-1 text-sm text-slate-600">模型的推理过程，同样计入上下文。</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="mb-3 font-semibold text-slate-900">2.2 为什么要管理：注意力预算与上下文腐烂</h3>
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-5">
+            <p class="font-semibold text-amber-900">Context Rot（上下文腐烂）</p>
+            <p class="mt-2 text-sm leading-relaxed text-amber-900">
+              随着上下文 token 数增加，模型准确回忆其中信息的能力会<strong>单调下降</strong>。所有模型都逃不掉，区别只是下降的斜率。这是<strong>渐进式退化，不是硬悬崖</strong>——你不会看到「超过 N token 突然崩」，只会发现它越来越容易忽略细节。相关研究见《Lost in the Middle》：放在长上下文中间位置的信息，被模型有效利用的概率显著低于开头和结尾。
+            </p>
+            <p class="mt-3 text-sm leading-relaxed text-amber-900">
+              因此每新增一个 token 都在消耗模型有限的<strong>注意力预算</strong>。上下文应被视为<strong>边际收益递减的稀缺资源</strong>。
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="mb-3 font-semibold text-slate-900">2.3 四种管理模式</h3>
+          <div class="overflow-hidden rounded-xl border border-slate-200">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-left text-slate-700">
+                <tr><th class="px-4 py-3 font-semibold">模式</th><th class="px-4 py-3 font-semibold">做法</th><th class="px-4 py-3 font-semibold">解决什么</th></tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">
+                <tr>
+                  <td class="px-4 py-3 font-medium text-teal-700">即时上下文<br><span class="text-xs font-normal text-slate-500">Just-in-time</span></td>
+                  <td class="px-4 py-3">不预先全量加载，只保留轻量标识（文件路径、查询、链接），需要时用工具动态拉取。</td>
+                  <td class="px-4 py-3">窗口占用（设计层面的选择）</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 font-medium text-teal-700">压缩<br><span class="text-xs font-normal text-slate-500">Compaction</span></td>
+                  <td class="px-4 py-3">对话过长时，把历史轮次自动摘要成单个块，替换原文。</td>
+                  <td class="px-4 py-3">长会话撑爆窗口</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 font-medium text-teal-700">提示缓存<br><span class="text-xs font-normal text-slate-500">Prompt caching</span></td>
+                  <td class="px-4 py-3">把系统提示、工具定义等稳定部分标记缓存，跨调用复用。</td>
+                  <td class="px-4 py-3">成本与延迟</td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 font-medium text-teal-700">记忆工具<br><span class="text-xs font-normal text-slate-500">Memory tool</span></td>
+                  <td class="px-4 py-3">把偏好、结论、进度写入外部记忆目录，跨会话存活。</td>
+                  <td class="px-4 py-3">无状态性（换会话即失忆）</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="mt-3 text-sm leading-relaxed text-slate-700">
+            生产环境通常是四种叠加使用：<strong>缓存</strong>稳定部分降成本、<strong>即时加载</strong>按需取数、<strong>压缩</strong>救长会话、<strong>记忆</strong>跨会话续接。
+          </p>
+        </div>
+
+        <div>
+          <h3 class="mb-3 font-semibold text-slate-900">2.4 系统提示的「正确高度」</h3>
+          <div class="rounded-xl bg-slate-900 p-5 text-sm text-slate-100">
+<pre class="font-mono leading-relaxed">❌ 太具体：硬编码一长串 if-else 逻辑 → 脆弱、难维护
+❌ 太模糊：只给「你要专业一点」      → 模型没有可执行的信号
+✅ 正确高度：足够具体地约束行为，又留出让模型发挥的启发式空间</pre>
+          </div>
+          <p class="mt-3 text-sm leading-relaxed text-slate-700">
+            实践路径：先用最强模型试<strong>最小提示</strong>，观察失败模式，再逐条增量补充指令和少量典型示例。注意「最小」不等于「最短」，而是「刚好能完整描述期望行为」。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="s3" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-teal-50/70 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-sm font-bold text-white">3</span>
+        <h2 class="text-xl font-semibold text-slate-900">具体应用场景</h2>
+      </div>
+      <div class="px-6 py-6">
+        <div class="rounded-xl border border-slate-200 p-5">
+          <h3 class="text-lg font-semibold text-slate-900">案例：合规审查 Agent 与「即时上下文」</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-700">
+            设想一个建筑合规审查 Agent，需要依据当地建筑规范判断方案是否合规。整本规范几十万字，直接塞进系统提示？窗口瞬间爆掉，且大部分条款跟当前问题无关。
+          </p>
+          <div class="mt-4 space-y-3">
+            <div class="flex gap-3 rounded-lg bg-rose-50 p-4">
+              <span class="font-bold text-rose-600">✗</span>
+              <div class="text-sm text-rose-900"><strong>错误做法：</strong>把整本规范预加载进上下文。结果：成本高、注意力被稀释、模型反而更容易漏掉关键条款。</div>
+            </div>
+            <div class="flex gap-3 rounded-lg bg-emerald-50 p-4">
+              <span class="font-bold text-emerald-600">✓</span>
+              <div class="text-sm text-emerald-900"><strong>正确做法：</strong>提供一个 <code class="rounded bg-white px-1 py-0.5">lookup_building_code(section_id)</code> 工具。Agent 判断当前需要查「消防通道宽度」，就按需把那一条拉进上下文；判断下一条时再拉下一条。</div>
+            </div>
+          </div>
+          <p class="mt-4 rounded-lg bg-teal-50 p-4 text-sm leading-relaxed text-teal-900">
+            <strong>本质：</strong>这模仿的正是人类认知——我们不背下整座图书馆，而是靠目录、索引、书签在需要时精准取用。文件系统、收件箱、收藏夹，都是人类的「外部上下文管理系统」。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="s4" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-teal-50/70 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-sm font-bold text-white">4</span>
+        <h2 class="text-xl font-semibold text-slate-900">易混淆问题与使用边界</h2>
+      </div>
+      <div class="space-y-4 px-6 py-6">
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4 font-medium text-slate-900">
+            <span class="arrow text-teal-500">▶</span> 上下文（Context）和提示词（Prompt）是一回事吗？
+          </summary>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            不是。提示词通常指你写的那段指令文本；上下文是<strong>本次请求进入模型的全部 token</strong>，提示词只是其中一部分。相应地，<strong>提示工程</strong>关注「怎么写好一段提示」，<strong>上下文工程</strong>关注「在整个推理过程里，如何持续维护最优的信息集合」——后者覆盖系统提示、工具、MCP、外部数据、消息历史等所有来源，是一个动态、跨轮次的课题。
+          </div>
+        </details>
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4 font-medium text-slate-900">
+            <span class="arrow text-teal-500">▶</span> 上下文窗口（Context Window）和记忆（Memory）有什么区别？
+          </summary>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            上下文窗口是<strong>易失的、单次的、有上限的</strong>——请求结束就没了，且塞满即失败。记忆是<strong>持久的、跨会话的、外部存储的</strong>——落在文件系统、数据库或向量库里，需要时再被读取「注入」上下文。二者的关系是：记忆是原材料仓库，上下文是当下的工作台。把长期信息留在仓库里、只在需要时搬上工作台，正是上下文工程的核心思路。
+          </div>
+        </details>
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4 font-medium text-slate-900">
+            <span class="arrow text-teal-500">▶</span> 上下文工程和 RAG 是什么关系？
+          </summary>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            RAG（检索增强生成）是上下文工程的<strong>一种手段</strong>，不是同义词。RAG 通常指「推理前用向量检索预先取回相关内容」；而即时上下文策略则让 Agent 在运行时用工具动态加载（如 grep、SQL 查询、文件读取）。趋势是从「全部预先检索」转向「预检索 + 即时加载」混合：前者快，后者准且省。
+          </div>
+        </details>
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4 font-medium text-slate-900">
+            <span class="arrow text-teal-500">▶</span> 局限性：窗口越大就越好吗？
+          </summary>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            <ul class="list-disc space-y-2 pl-5">
+              <li><strong>不等于更好。</strong>上下文腐烂依然存在，长上下文只是延缓问题，不能消除问题。精心裁剪上下文比单纯追求大窗口更有效。</li>
+              <li><strong>成本与延迟线性上升。</strong>每轮请求都要为全部输入 token 付费。</li>
+              <li><strong>工具集膨胀是隐形杀手。</strong>定义了几十个功能重叠的工具，光是工具定义就吃掉大量窗口，还会让模型选错工具。判据：如果人类工程师都说不清该用哪个，就别指望模型能选对。</li>
+              <li><strong>压缩会丢信息。</strong>摘要必然有损，关键信息应提前落盘到记忆或文件系统，而不是指望压缩保住它。</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="s5" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-teal-50/70 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-sm font-bold text-white">5</span>
+        <h2 class="text-xl font-semibold text-slate-900">自测问题</h2>
+      </div>
+      <div class="space-y-4 px-6 py-6">
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4">
+            <span class="rounded bg-teal-100 px-2 py-0.5 text-xs font-bold text-teal-700">Q1</span>
+            <span class="font-medium text-slate-900">模型有 100 万 token 的窗口，是不是就可以把所有资料一股脑丢进去了？请指出至少两个反对理由。</span>
+          </summary>
+          <div class="border-t border-slate-100 bg-emerald-50/50 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            <strong class="text-emerald-800">参考答案：</strong>
+            <ol class="mt-2 list-decimal space-y-2 pl-5">
+              <li><strong>上下文腐烂：</strong>token 越多，模型准确召回其中信息的能力越低，位于中间的内容尤其容易被忽略（Lost in the Middle）。性能是梯度下降而非断崖，所以「塞得下」不等于「用得好」。</li>
+              <li><strong>注意力预算：</strong>每个 token 都在争夺模型有限的注意力，无关信息会稀释关键信号，反而降低表现。</li>
+              <li><strong>成本与延迟：</strong>每轮请求都为全部输入付费，长窗口会显著推高开销和响应时间。</li>
+              <li><strong>正确做法：</strong>以「最小高信号 token 集合」为目标，用即时加载、压缩、缓存、记忆四种手段按需供给。</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4">
+            <span class="rounded bg-teal-100 px-2 py-0.5 text-xs font-bold text-teal-700">Q2</span>
+            <span class="font-medium text-slate-900">你的 Agent 跑了 200 轮后开始「忘记」最初的需求。有哪些手段可以缓解？它们解决的是同一类问题吗？</span>
+          </summary>
+          <div class="border-t border-slate-100 bg-emerald-50/50 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            <strong class="text-emerald-800">参考答案：</strong>可用四类手段，且<strong>针对不同失效模式</strong>，不应互相替代：
+            <ul class="mt-2 list-disc space-y-2 pl-5">
+              <li><strong>压缩（Compaction）：</strong>把早期轮次摘要成块，解决窗口放不下的问题，但有损。</li>
+              <li><strong>记忆工具（Memory）：</strong>把目标、决策、进度写入外部记忆目录，解决跨会话 / 长任务的持久性问题——<strong>这才是「忘记最初需求」的正解</strong>，因为关键信息应当在压缩前就落盘。</li>
+              <li><strong>子智能体（Subagent）：</strong>把探索性子任务放进独立上下文窗口，只回传结论，避免无关中间结果污染主上下文。</li>
+              <li><strong>提示缓存：</strong>稳定前缀复用，只降成本，不解决遗忘。</li>
+            </ul>
+            <p class="mt-3">实践要点：先落盘关键状态 → 再压缩 → 必要时拆分上下文。</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="s6" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-teal-50/70 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-600 text-sm font-bold text-white">6</span>
+        <h2 class="text-xl font-semibold text-slate-900">参考资料来源</h2>
+      </div>
+      <div class="px-6 py-6">
+        <ol class="space-y-3">
+          <li class="rounded-xl border border-slate-200 p-4">
+            <div class="font-medium text-slate-900">Effective context engineering for AI agents — Anthropic 工程博客</div>
+            <p class="mt-1 text-sm text-slate-600">上下文工程的奠基性文章，提出「上下文是边际收益递减的稀缺资源」，系统讲解系统提示、工具设计与即时检索策略。</p>
+            <a href="https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents" target="_blank" rel="noopener" class="mt-2 inline-block break-all text-sm text-teal-600 hover:underline">https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents</a>
+          </li>
+          <li class="rounded-xl border border-slate-200 p-4">
+            <div class="font-medium text-slate-900">Context management — Claude Academy（Claude Platform 101）</div>
+            <p class="mt-1 text-sm text-slate-600">官方课程，清晰列出上下文的构成与四种管理模式（即时上下文、服务端压缩、提示缓存、记忆工具）及其适用场景。</p>
+            <a href="https://academy.claude.com/courses/claude-platform-101/context-management" target="_blank" rel="noopener" class="mt-2 inline-block break-all text-sm text-teal-600 hover:underline">https://academy.claude.com/courses/claude-platform-101/context-management</a>
+          </li>
+          <li class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+            <div class="font-medium text-slate-900">扩展阅读：Lost in the Middle: How Language Models Use Long Contexts（arXiv:2307.03172）</div>
+            <p class="mt-1 text-sm text-slate-600">「上下文腐烂」的重要实证依据：长上下文中间位置的信息利用率显著下降。</p>
+            <a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noopener" class="mt-2 inline-block break-all text-sm text-teal-600 hover:underline">https://arxiv.org/abs/2307.03172</a>
+          </li>
+        </ol>
+        <p class="mt-4 text-xs text-slate-500">以上链接均已人工核查可访问（HTTP 200）。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t border-slate-200 pt-6 text-sm text-slate-500">
+    本页由项目级 Skill <code class="rounded bg-slate-100 px-1 py-0.5">.workbuddy/skills/concept-generator</code> 生成 · 建议结合
+    <span class="text-slate-700">concept-relationship.md</span> 一起理解 Agent、上下文与 Skill 的关系。
+  </footer>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概念学习：Agent（智能体）</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif; }
+  details > summary { list-style: none; cursor: pointer; }
+  details > summary::-webkit-details-marker { display: none; }
+  details[open] .arrow { transform: rotate(90deg); }
+  .arrow { transition: transform .18s ease; display: inline-block; }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+
+<!-- 顶部 -->
+<header class="bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-600 text-white">
+  <div class="mx-auto max-w-4xl px-6 py-12">
+    <div class="flex items-center gap-3 text-indigo-100 text-sm font-medium">
+      <a href="../README.md" class="hover:text-white">项目首页</a>
+      <span>/</span>
+      <span>learning-materials</span>
+    </div>
+    <h1 class="mt-4 text-4xl sm:text-5xl font-bold tracking-tight">Agent（智能体）</h1>
+    <p class="mt-3 text-lg text-indigo-100">概念学习资料 · 由项目级 Skill「概念学习资料生成器」生成</p>
+    <div class="mt-6 flex flex-wrap gap-2 text-xs">
+      <span class="rounded-full bg-white/15 px-3 py-1">AI 基础概念</span>
+      <span class="rounded-full bg-white/15 px-3 py-1">建议学习时长 15 分钟</span>
+      <span class="rounded-full bg-white/15 px-3 py-1">含 2 道自测题</span>
+    </div>
+  </div>
+</header>
+
+<!-- 目录导航 -->
+<nav class="sticky top-0 z-10 border-b border-slate-200 bg-white/85 backdrop-blur">
+  <div class="mx-auto flex max-w-4xl flex-wrap gap-x-6 gap-y-2 px-6 py-3 text-sm text-slate-600">
+    <a href="#s1" class="hover:text-indigo-600">一句话定义</a>
+    <a href="#s2" class="hover:text-indigo-600">核心机制</a>
+    <a href="#s3" class="hover:text-indigo-600">应用场景</a>
+    <a href="#s4" class="hover:text-indigo-600">易混淆与边界</a>
+    <a href="#s5" class="hover:text-indigo-600">自测</a>
+    <a href="#s6" class="hover:text-indigo-600">参考资料</a>
+    <a href="../concept-relationship.md" class="ml-auto font-medium text-indigo-600 hover:underline">查看三概念关系 →</a>
+  </div>
+</nav>
+
+<main class="mx-auto max-w-4xl px-6 py-10 space-y-10">
+
+  <!-- 1 一句话定义 -->
+  <section id="s1" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-indigo-50/60 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">1</span>
+        <h2 class="text-xl font-semibold text-slate-900">标题与一句话定义</h2>
+      </div>
+      <div class="px-6 py-6">
+        <div class="rounded-xl border-l-4 border-indigo-500 bg-indigo-50/50 p-5">
+          <p class="text-lg leading-relaxed text-slate-800">
+            <strong>Agent（智能体）</strong>就是：<span class="font-semibold text-indigo-700">让大模型在一个循环里自己决定下一步用什么工具、做什么动作，并依据环境的真实反馈不断调整，直到把任务做完。</span>
+          </p>
+        </div>
+        <p class="mt-5 leading-relaxed text-slate-700">
+          换个大白话说：普通的 LLM 调用像「一问一答」的答题机器，你问一句它答一句；而 Agent 像一个被交代了目标的下属——它会自己拆任务、查资料、动手做、发现错了再改，中途遇到拿不准的才回来问你。
+        </p>
+        <p class="mt-4 leading-relaxed text-slate-700">
+          Anthropic 在《Building effective agents》中给出的收敛定义非常精炼：<span class="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-sm">LLMs autonomously using tools in a loop</span>（大模型自主地在循环中调用工具）。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 核心机制 -->
+  <section id="s2" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-indigo-50/60 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">2</span>
+        <h2 class="text-xl font-semibold text-slate-900">核心机制与组成</h2>
+      </div>
+      <div class="space-y-6 px-6 py-6">
+
+        <div>
+          <h3 class="mb-3 font-semibold text-slate-900">2.1 四个必备零件</h3>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="mb-1 font-semibold text-indigo-700">🧠 推理引擎（LLM）</div>
+              <p class="text-sm text-slate-600">负责理解目标、拆解步骤、决定调用哪个工具、判断任务是否完成。它是「大脑」。</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="mb-1 font-semibold text-indigo-700">🛠 工具集（Tools）</div>
+              <p class="text-sm text-slate-600">负责真正动手：读文件、跑命令、调 API、搜网页。它是「手」。工具文档写得清不清楚，直接决定 Agent 好不好用。</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="mb-1 font-semibold text-indigo-700">📚 记忆（Memory）</div>
+              <p class="text-sm text-slate-600">短期记忆放在上下文窗口里；长期记忆落在文件系统、数据库或向量库中，跨会话保留。</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <div class="mb-1 font-semibold text-indigo-700">🔁 编排循环（Orchestration）</div>
+              <p class="text-sm text-slate-600">把上面三者串起来的骨架，驱动「思考 → 行动 → 观察」不断迭代。</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="mb-3 font-semibold text-slate-900">2.2 主循环：收集上下文 → 行动 → 验证 → 重复</h3>
+          <div class="overflow-x-auto rounded-xl bg-slate-900 p-5 text-sm text-slate-100">
+<pre class="font-mono leading-relaxed">        ┌──────────────────────────────────────────┐
+        │                                          │
+        ▼                                          │
+  ① 收集上下文  ──▶  ② 采取行动  ──▶  ③ 验证结果 ──┘
+  (gather context)   (take action)   (verify work)
+   读文件 / grep        调工具 / 改文件    跑测试 / 看报错
+                                          │
+                                     不通过则回到 ①</pre>
+          </div>
+          <p class="mt-3 text-sm leading-relaxed text-slate-700">
+            关键在于第 ③ 步：Agent 必须能从环境拿到<strong>真实反馈（ground truth）</strong>——比如工具返回值、代码执行结果、测试通过与否。没有反馈的循环是自说自话，有了反馈才能自我纠错。
+          </p>
+        </div>
+
+        <div>
+          <h3 class="mb-3 font-semibold text-slate-900">2.3 两类「智能体系统」：Workflow 与 Agent</h3>
+          <div class="overflow-hidden rounded-xl border border-slate-200">
+            <table class="w-full text-sm">
+              <thead class="bg-slate-50 text-left text-slate-700">
+                <tr><th class="px-4 py-3 font-semibold">维度</th><th class="px-4 py-3 font-semibold">Workflow（工作流）</th><th class="px-4 py-3 font-semibold">Agent（智能体）</th></tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-slate-700">
+                <tr><td class="px-4 py-3 font-medium">控制流</td><td class="px-4 py-3">由开发者用代码预先写死</td><td class="px-4 py-3">由模型在运行时动态决定</td></tr>
+                <tr><td class="px-4 py-3 font-medium">步数</td><td class="px-4 py-3">固定、可预测</td><td class="px-4 py-3">不固定，按需展开</td></tr>
+                <tr><td class="px-4 py-3 font-medium">优势</td><td class="px-4 py-3">稳定、一致、成本低</td><td class="px-4 py-3">灵活、能应对开放问题</td></tr>
+                <tr><td class="px-4 py-3 font-medium">典型模式</td><td class="px-4 py-3">Prompt chaining、路由、并行、评估-优化</td><td class="px-4 py-3">自主多轮工具调用</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="mt-3 rounded-lg bg-amber-50 p-4 text-sm leading-relaxed text-amber-900">
+            <strong>实践建议：</strong>先找最简单的方案，只有当复杂度确实带来效果提升时才往上加。Workflow 能解决的，别硬上 Agent。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 应用场景 -->
+  <section id="s3" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-indigo-50/60 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">3</span>
+        <h2 class="text-xl font-semibold text-slate-900">具体应用场景</h2>
+      </div>
+      <div class="px-6 py-6">
+        <div class="rounded-xl border border-slate-200 p-5">
+          <h3 class="text-lg font-semibold text-slate-900">案例：编码 Agent 修复一个真实的 Issue</h3>
+          <p class="mt-2 text-sm leading-relaxed text-slate-700">
+            这是 Agent 目前最成熟、也最容易验证的落地场景（SWE-bench 类任务）。假设你给它的指令是「修复 <code class="rounded bg-slate-100 px-1 py-0.5">#142</code>：导出 CSV 时中文乱码」：
+          </p>
+          <ol class="mt-4 space-y-3">
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">1</span>
+              <div><strong class="text-slate-900">收集上下文：</strong><span class="text-slate-700">用 <code class="rounded bg-slate-100 px-1 py-0.5">grep</code> 搜索 export 相关代码，读取命中的两个文件，而不是把整个仓库塞进上下文。</span></div>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">2</span>
+              <div><strong class="text-slate-900">采取行动：</strong><span class="text-slate-700">定位到 <code class="rounded bg-slate-100 px-1 py-0.5">toCSV()</code> 缺少 BOM 头，编辑文件补上 <code class="rounded bg-slate-100 px-1 py-0.5">\ufeff</code>。</span></div>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">3</span>
+              <div><strong class="text-slate-900">验证结果：</strong><span class="text-slate-700">运行单测与导出脚本，用命令行检查输出编码。测试仍红 → 读报错 → 回到第 1 步。</span></div>
+            </li>
+            <li class="flex gap-3">
+              <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-700">4</span>
+              <div><strong class="text-slate-900">收尾：</strong><span class="text-slate-700">测试通过，提交改动并汇报。遇到「要不要改公共 API」这类高风险决策时停下来问人。</span></div>
+            </li>
+          </ol>
+          <p class="mt-4 rounded-lg bg-emerald-50 p-4 text-sm leading-relaxed text-emerald-900">
+            <strong>为什么这个场景适合 Agent？</strong>因为它同时满足四个条件：任务开放（改法不唯一）、有明确成功标准（测试通过）、有反馈回路（报错即信号）、可插入人工审核（关键改动先确认）。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 易混淆 -->
+  <section id="s4" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-indigo-50/60 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">4</span>
+        <h2 class="text-xl font-semibold text-slate-900">易混淆问题与使用边界</h2>
+      </div>
+      <div class="space-y-4 px-6 py-6">
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4 font-medium text-slate-900">
+            <span class="arrow text-indigo-500">▶</span> Agent 和 Chatbot（聊天机器人）有什么区别？
+          </summary>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            Chatbot 的核心是「对话」——它输出文本，控制权在用户手里，你说一句它回一句。Agent 的核心是「交付结果」——它能调用工具改变外部世界的状态（写文件、发请求、改数据库），并且下一步做什么由模型自己决定。一个只会陪你聊「怎么修 bug」的是 Chatbot；真的把代码改了并跑通测试的是 Agent。
+          </div>
+        </details>
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4 font-medium text-slate-900">
+            <span class="arrow text-indigo-500">▶</span> Agent 和 Workflow 的边界到底在哪？
+          </summary>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            一个很好用的判据：<strong>控制流在谁手里</strong>。如果应用程序的执行路径由你的代码写死（先 A 再 B 再 C），那只是 Workflow；如果 LLM 能改变应用的控制流——决定要不要调 A、调几次、失败了换 D——那才是 Agent。LangChain 创始人 Harrison Chase 的表述是：&ldquo;If the LLM can change your application&rsquo;s control flow, it&rsquo;s an agent.&rdquo;
+          </div>
+        </details>
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4 font-medium text-slate-900">
+            <span class="arrow text-indigo-500">▶</span> Multi-Agent、Subagent 和 Agent 是一回事吗？
+          </summary>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            不是。Subagent（子智能体）是<strong>架构手段</strong>，不是 Agent 的同义词。它的价值主要有两点：一是并行提速，二是<strong>隔离上下文</strong>——子任务在独立的上下文窗口里折腾，只把结论回传给主 Agent，避免大量无关中间结果污染主上下文。多智能体只是「用多个 Agent 协作」的一种组织方式。
+          </div>
+        </details>
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4 font-medium text-slate-900">
+            <span class="arrow text-indigo-500">▶</span> 局限性：什么时候不该用 Agent？
+          </summary>
+          <div class="border-t border-slate-100 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            <ul class="list-disc space-y-2 pl-5">
+              <li><strong>步骤可预测的任务</strong>：能写死流程就用 Workflow，Agent 只会增加不确定性和成本。</li>
+              <li><strong>成本与延迟敏感</strong>：自主意味着多轮调用，token 消耗和耗时都会成倍上升。</li>
+              <li><strong>错误会累积</strong>：一个小失误可能在后续步骤中被放大，所以要在沙箱里充分测试并加护栏。</li>
+              <li><strong>高风险不可逆操作</strong>：删除数据、强制推送、对外发消息等，必须留人工确认环节。</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 自测 -->
+  <section id="s5" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-indigo-50/60 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">5</span>
+        <h2 class="text-xl font-semibold text-slate-900">自测问题</h2>
+      </div>
+      <div class="space-y-4 px-6 py-6">
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4">
+            <span class="rounded bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-700">Q1</span>
+            <span class="font-medium text-slate-900">你的团队做了一条规定：所有金额计算必须由代码完成，不许让模型「心算」。这是 Agent 设计中的什么考量？</span>
+          </summary>
+          <div class="border-t border-slate-100 bg-emerald-50/50 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            <strong class="text-emerald-800">参考答案：</strong>这是<strong>把确定性工作从模型手里剥离、交给工具</strong>的设计原则。LLM 负责推理与编排（决定算什么、怎么算），而具体计算交给可执行代码，这样既保证结果的准确与可复现，也避免 token 生成带来的误差和成本。同时也属于护栏（guardrails）设计——对不可出错的环节用确定性手段兜底。
+          </div>
+        </details>
+
+        <details class="group rounded-xl border border-slate-200">
+          <summary class="flex items-center gap-2 px-5 py-4">
+            <span class="rounded bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-700">Q2</span>
+            <span class="font-medium text-slate-900">一个系统里 LLM 会调用工具，但调用顺序被硬编码为「先查库 → 再调 API → 最后写文件」，永不变动。它是 Agent 吗？为什么？</span>
+          </summary>
+          <div class="border-t border-slate-100 bg-emerald-50/50 px-5 py-4 text-sm leading-relaxed text-slate-700">
+            <strong class="text-emerald-800">参考答案：</strong>严格来说不是，它是 <strong>Workflow</strong>。判据是控制流的归属：这里每一步做什么、做几次都由代码预先固定，LLM 只在单步内做生成任务，无法改变应用的控制流。只有当模型能自主决定「要不要调、调哪个、失败了怎么办」时，才构成 Agent。这也提醒我们：很多号称 Agent 的产品其实只是 Workflow，选型时不必盲目追新。
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 参考资料 -->
+  <section id="s6" class="scroll-mt-20">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div class="flex items-center gap-3 border-b border-slate-100 bg-indigo-50/60 px-6 py-4">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">6</span>
+        <h2 class="text-xl font-semibold text-slate-900">参考资料来源</h2>
+      </div>
+      <div class="px-6 py-6">
+        <ol class="space-y-3">
+          <li class="rounded-xl border border-slate-200 p-4">
+            <div class="font-medium text-slate-900">Building effective agents — Anthropic 工程博客</div>
+            <p class="mt-1 text-sm text-slate-600">业界最常被引用的 Agent 实践文章，系统区分了 Workflow 与 Agent，并给出五种工作流模式与三条核心原则。</p>
+            <a href="https://www.anthropic.com/engineering/building-effective-agents" target="_blank" rel="noopener" class="mt-2 inline-block break-all text-sm text-indigo-600 hover:underline">https://www.anthropic.com/engineering/building-effective-agents</a>
+          </li>
+          <li class="rounded-xl border border-slate-200 p-4">
+            <div class="font-medium text-slate-900">Building agents with the Claude Agent SDK — Claude by Anthropic</div>
+            <p class="mt-1 text-sm text-slate-600">从工程实现角度讲「收集上下文 → 行动 → 验证」循环，并介绍子智能体与上下文压缩等实现细节。</p>
+            <a href="https://claude.com/blog/building-agents-with-the-claude-agent-sdk" target="_blank" rel="noopener" class="mt-2 inline-block break-all text-sm text-indigo-600 hover:underline">https://claude.com/blog/building-agents-with-the-claude-agent-sdk</a>
+          </li>
+        </ol>
+        <p class="mt-4 text-xs text-slate-500">以上链接均已人工核查可访问（HTTP 200）。</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t border-slate-200 pt-6 text-sm text-slate-500">
+    本页由项目级 Skill <code class="rounded bg-slate-100 px-1 py-0.5">.workbuddy/skills/concept-generator</code> 生成 · 建议结合
+    <a href="../concept-relationship.md" class="text-indigo-600 hover:underline">concept-relationship.md</a> 一起理解 Agent、上下文与 Skill 的关系。
+  </footer>
+</main>
+
+</body>
+</html>
